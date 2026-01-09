@@ -145,10 +145,60 @@ By default, browsers block a website on port 3000 from fetching data from port 8
 
 ---
 
+## Step 4: User Authentication (Simplified)
+
+We replaced the "Topic" logic with a simple User Authentication system.
+
+### 1. The User Model (`User.java`)
+**File:** `src/main/java/com/seekhog/backend/model/User.java`
+
+A simple class to hold user data: `id`, `username`, `password`, `role`.
+
+### 2. The Auth Controller (`AuthController.java`)
+**File:** `src/main/java/com/seekhog/backend/controller/AuthController.java`
+
+This controller handles:
+*   **Sign Up:** `POST /api/auth/signup` - Adds a user to our temporary list.
+*   **Login:** `POST /api/auth/login` - Checks if username/password match.
+*   **Anonymous:** `POST /api/auth/anonymous` - Creates a temporary guest user.
+
+**Note:** We are using an `ArrayList` as a temporary database. If you restart the server, all users will be lost. This is fine for testing.
+
+---
+
+## Troubleshooting & Fixes
+
+We encountered some common setup issues. Here is how we fixed them:
+
+### Issue 1: "Green Play Button" Missing / Not Runnable
+*   **Problem:** IntelliJ didn't recognize the project structure or the `main` method.
+*   **Fix:** We had to explicitly tell IntelliJ that this is a Maven project.
+    *   Right-click `pom.xml` -> **"Add as Maven Project"**.
+    *   This forced IntelliJ to download dependencies and index the project.
+
+### Issue 2: "Cannot resolve symbol 'springframework'"
+*   **Problem:** The code was red because the Spring Boot libraries weren't downloaded yet.
+*   **Fix:**
+    *   Open the **Maven** tool window (Right sidebar).
+    *   Click the **Refresh** (Reload) icon.
+    *   Wait for the bottom progress bar to finish downloading JARs.
+
+### Issue 3: "Package name does not correspond to file path"
+*   **Problem:** We manually marked `src` as the "Sources Root", which confused the package structure.
+*   **Fix:**
+    *   Unmark `src`.
+    *   Mark `src/main/java` as the **Sources Root** (Blue folder).
+    *   Reload Maven project.
+
+---
+
 ### Current Status
 *   [x] Project Created
 *   [x] Dependencies Added (pom.xml)
 *   [x] Main Application Class Created
 *   [x] First Endpoint Created (HelloController)
 *   [x] CORS Configuration Created (WebConfig)
-*   [ ] Data Structure / Models (Next Step)
+*   [x] User Model Created
+*   [x] Auth Controller Created (Signup, Login, Anonymous)
+*   [x] **Verified:** Signup endpoint works via curl!
+*   [ ] Database Integration (Next Step)
