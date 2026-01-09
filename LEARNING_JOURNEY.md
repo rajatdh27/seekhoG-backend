@@ -221,6 +221,28 @@ We added a feature for users to track their learning progress.
 
 ---
 
+## Step 7: Export Feature (Excel & PDF)
+
+We added the ability to export selected learning logs.
+
+### 1. Dependencies (`pom.xml`)
+*   **Apache POI:** For generating Excel files.
+*   **iText PDF:** For generating PDF files.
+
+### 2. The DTO (`ExportRequest.java`)
+*   A simple object to hold the incoming JSON: `{ "userId": "...", "logIds": [1, 2, 3] }`.
+
+### 3. The Service (`ExportService.java`)
+*   **Validation:** Fetches logs by ID and filters out any that don't belong to the requesting user (Security).
+*   **Excel Generation:** Creates a workbook, sheet, header row, and data rows. Returns a byte stream.
+*   **PDF Generation:** Creates a PDF document with a table and populates it. Returns a byte stream.
+
+### 4. The Controller (`ExportController.java`)
+*   **POST** `/api/journey/export/excel`: Returns the Excel file as a download.
+*   **POST** `/api/journey/export/pdf`: Returns the PDF file as a download.
+
+---
+
 ## How to Access the Database (H2 Console)
 
 Since H2 is in-memory, it has a built-in web interface to view your data.
@@ -285,3 +307,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] **Verified:** Database persistence works (checked via H2 Console)
 *   [x] **Verified:** Frontend successfully connected!
 *   [x] "My Journey" Feature Implemented (Model, Repo, Controller)
+*   [x] Export Feature Implemented (Excel & PDF with Selection)
