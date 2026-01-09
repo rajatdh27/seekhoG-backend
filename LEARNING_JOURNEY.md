@@ -243,6 +243,46 @@ We added the ability to export selected learning logs.
 
 ---
 
+## Step 8: Deployment Preparation (Docker)
+
+We created a `Dockerfile` to allow deployment on platforms like Render.
+
+### What is Docker?
+Think of Docker as a **Shipping Container** for your code.
+*   **Without Docker:** You send your code to a server. The server might have the wrong Java version, missing libraries, or a different OS. It breaks.
+*   **With Docker:** You package your code + Java + Libraries + OS Settings into a sealed box (Image). You send the box. The server just runs the box. It works exactly the same everywhere.
+
+### The Dockerfile Explained
+**File:** `Dockerfile`
+
+We used a **Multi-Stage Build** (a pro technique to keep the file size small).
+
+**Stage 1: The Factory (Build)**
+```dockerfile
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+```
+*   **What it does:** It downloads a heavy image with Maven installed. It copies your source code and runs the build command (`mvn package`). This creates the `.jar` file (the executable).
+
+**Stage 2: The Delivery Truck (Run)**
+```dockerfile
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+*   **What it does:** It starts fresh with a tiny, lightweight Java image (no Maven, no source code). It copies *only* the `.jar` file from Stage 1. It tells the server to run that jar on port 8080.
+
+### Why do we do this?
+*   **Size:** The "Factory" image is huge (800MB+). The "Delivery" image is small (<200MB). We only deploy the small one.
+*   **Security:** The final image doesn't contain your source code, only the compiled binary.
+
+---
+
 ## How to Access the Database (H2 Console)
 
 Since H2 is in-memory, it has a built-in web interface to view your data.
@@ -289,6 +329,13 @@ We encountered some common setup issues. Here is how we fixed them:
     *   Click **Reload All Maven Projects**.
     *   Wait for the download to complete.
 
+### Issue 5: "Cannot resolve method 'getLearningDate'"
+*   **Problem:** Lombok annotations (`@Data`) weren't being processed by IntelliJ.
+*   **Fix:**
+    *   Go to **Settings** > **Build, Execution, Deployment** > **Compiler** > **Annotation Processors**.
+    *   Check **Enable annotation processing**.
+    *   (Alternatively) Install the Lombok plugin if missing.
+
 ---
 
 ### Current Status
@@ -308,3 +355,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] **Verified:** Frontend successfully connected!
 *   [x] "My Journey" Feature Implemented (Model, Repo, Controller)
 *   [x] Export Feature Implemented (Excel & PDF with Selection)
+*   [x] Dockerfile Created for Deployment
