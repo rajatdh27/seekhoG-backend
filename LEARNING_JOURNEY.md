@@ -140,9 +140,6 @@ public class WebConfig {
 2.  **`@Bean`:** This is a very important concept. It tells Spring "Take the result of this function and keep it in your memory. Use it whenever you need to configure the web server."
 3.  **The Logic:** We are explicitly telling the server to accept requests from `localhost:3000`.
 
-### Why do we need this?
-By default, browsers block a website on port 3000 from fetching data from port 8080 for security. This config disables that block for our specific frontend.
-
 ---
 
 ## Step 4: User Authentication (Simplified)
@@ -163,6 +160,38 @@ This controller handles:
 *   **Anonymous:** `POST /api/auth/anonymous` - Creates a temporary guest user.
 
 **Note:** We are using an `ArrayList` as a temporary database. If you restart the server, all users will be lost. This is fine for testing.
+
+---
+
+## Step 5: Database Integration (H2 & JPA)
+
+We are now adding a real database to store users permanently.
+
+### 1. The Dependencies (`pom.xml`)
+We added two new items to our shopping list:
+*   **Spring Data JPA:** The tool that lets Java talk to databases using Objects instead of SQL queries.
+*   **H2 Database:** A lightweight database that runs inside the app's memory (great for dev).
+
+### 2. The Configuration (`application.properties`)
+**File:** `src/main/resources/application.properties`
+**Node.js Equivalent:** `.env` file.
+
+We told Spring Boot:
+*   "Use H2 database."
+*   "If I change my Java classes, automatically update the database tables (`ddl-auto=update`)."
+
+### 3. The Entity (`User.java`)
+**Node.js Equivalent:** Mongoose Schema.
+
+We added `@Entity` to our User class. This tells Spring: "Create a table named `users` with columns `id`, `username`, `password`, `role`."
+
+### 4. The Repository (`UserRepository.java`)
+**Node.js Equivalent:** `User.find()`, `User.create()` methods.
+
+This is an **Interface**. We don't write the code! We just say `extends JpaRepository`, and Spring *magically* generates methods like `save()`, `findById()`, `delete()` for us.
+
+### 5. The Controller Update (`AuthController.java`)
+We replaced the `ArrayList` with `userRepository`. Now, when we call `userRepository.save(user)`, it actually writes SQL (`INSERT INTO users...`) and saves it to the H2 database.
 
 ---
 
@@ -201,4 +230,8 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] User Model Created
 *   [x] Auth Controller Created (Signup, Login, Anonymous)
 *   [x] **Verified:** Signup endpoint works via curl!
-*   [ ] Database Integration (Next Step)
+*   [x] Database Dependencies Added (H2, JPA)
+*   [x] User Entity Configured
+*   [x] UserRepository Created
+*   [x] AuthController Connected to DB
+*   [ ] Verify Database Persistence (Next Step)
