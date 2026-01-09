@@ -167,6 +167,12 @@ This controller handles:
 
 We are now adding a real database to store users permanently.
 
+### Why H2?
+*   **Zero Config:** It runs inside the app's memory. No installation required.
+*   **Fast:** It's in-memory, so it's instant.
+*   **Standard SQL:** It behaves like a real SQL database.
+*   **Easy Switch:** Because we use JPA, switching to Postgres later is just a config change.
+
 ### 1. The Dependencies (`pom.xml`)
 We added two new items to our shopping list:
 *   **Spring Data JPA:** The tool that lets Java talk to databases using Objects instead of SQL queries.
@@ -195,6 +201,41 @@ We replaced the `ArrayList` with `userRepository`. Now, when we call `userReposi
 
 ---
 
+## Step 6: "My Journey" Feature
+
+We added a feature for users to track their learning progress.
+
+### 1. The Model (`LearningEntry.java`)
+*   **Table:** `learning_entries`
+*   **Fields:** `topic`, `subTopic`, `content` (Large Text), `difficulty`, `referenceLink`, `platform`, `learningDate`.
+*   **Relationship:** Linked to `User` via `userId` (String).
+
+### 2. The Repository (`LearningEntryRepository.java`)
+*   Added a custom method: `findByUserIdOrderByLearningDateDesc(String userId)`
+*   This automatically writes the SQL: `SELECT * FROM learning_entries WHERE user_id = ? ORDER BY learning_date DESC`
+
+### 3. The Controller (`LearningEntryController.java`)
+*   **GET** `/api/journey/{userId}`: Fetch all entries for a user.
+*   **POST** `/api/journey`: Add a new entry.
+*   **DELETE** `/api/journey/{id}`: Delete an entry.
+
+---
+
+## How to Access the Database (H2 Console)
+
+Since H2 is in-memory, it has a built-in web interface to view your data.
+
+1.  **Open Browser:** Go to `http://localhost:8080/h2-console`
+2.  **Enter Settings:**
+    *   **Driver Class:** `org.h2.Driver`
+    *   **JDBC URL:** `jdbc:h2:mem:seekhogdb`
+    *   **User Name:** `sa`
+    *   **Password:** `password`
+3.  **Connect:** Click the "Connect" button.
+4.  **View Data:** Click on the `USERS` table in the left sidebar and click "Run" to see your registered users.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -219,6 +260,13 @@ We encountered some common setup issues. Here is how we fixed them:
     *   Mark `src/main/java` as the **Sources Root** (Blue folder).
     *   Reload Maven project.
 
+### Issue 4: "package org.springframework.data.jpa.repository does not exist"
+*   **Problem:** We added the dependency to `pom.xml`, but Maven hadn't finished downloading it, so the code couldn't find it.
+*   **Fix:**
+    *   Open **Maven** tool window.
+    *   Click **Reload All Maven Projects**.
+    *   Wait for the download to complete.
+
 ---
 
 ### Current Status
@@ -234,4 +282,6 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] User Entity Configured
 *   [x] UserRepository Created
 *   [x] AuthController Connected to DB
-*   [ ] Verify Database Persistence (Next Step)
+*   [x] **Verified:** Database persistence works (checked via H2 Console)
+*   [x] **Verified:** Frontend successfully connected!
+*   [x] "My Journey" Feature Implemented (Model, Repo, Controller)
