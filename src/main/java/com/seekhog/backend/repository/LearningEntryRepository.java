@@ -11,12 +11,14 @@ import java.util.List;
 
 @Repository
 public interface LearningEntryRepository extends JpaRepository<LearningEntry, Long> {
-
+    
     // Find all entries for a specific user, ordered by date
     List<LearningEntry> findByUserIdOrderByLearningDateDesc(String userId);
 
+    // Count logs for a specific user
+    Long countByUserId(String userId);
+
     // Leaderboard Query
-    // We join LearningEntry (l) with User (u) on l.userId = u.id
     @Query("SELECT new com.seekhog.backend.dto.LeaderboardEntryDTO(u.username, COUNT(l), MAX(l.learningDate)) " +
            "FROM LearningEntry l, User u " +
            "WHERE l.userId = u.id " +

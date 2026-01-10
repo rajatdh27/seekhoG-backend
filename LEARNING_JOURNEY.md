@@ -408,6 +408,21 @@ We fixed the "Unknown User" issue and added the "Sent Requests" tab.
 
 ---
 
+## Step 16: Friend Stats (Total Logs)
+
+We added `totalLogs` to the Friendship Response so you can see how active your friends are.
+
+### 1. Repository Update (`LearningEntryRepository.java`)
+*   Added `countByUserId(String userId)` to quickly count logs.
+
+### 2. DTO Update (`FriendshipResponse.java`)
+*   Added `Long totalLogs` field.
+
+### 3. Controller Update (`FriendshipController.java`)
+*   In `mapToDTO`, we now call `learningRepository.countByUserId(friendId)` and pass it to the DTO.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -491,3 +506,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Real-Time Private Chat & Presence Configured (Phase 3 of Social)
 *   [x] User Search API Implemented
 *   [x] Friendship DTO & Sent Requests Implemented
+*   [x] Friend Stats (Total Logs) Added
