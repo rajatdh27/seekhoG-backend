@@ -356,6 +356,11 @@ We are upgrading the chat system to support private (1-on-1) and group conversat
 *   **`ConversationRepository`:** Includes a complex query `findDirectConversation` to check if a 1-on-1 chat already exists between two users.
 *   **`MessageRepository`:** Fetches messages for a specific conversation.
 
+### 3. The Controller (`AdvancedChatController.java`)
+*   **POST** `/api/chat/create/private/{targetUserId}`: Creates a new chat or returns the existing one.
+*   **GET** `/api/chat/conversations`: Lists all chats for a user.
+*   **GET** `/api/chat/history/{conversationId}`: Fetches messages for a specific chat.
+
 ---
 
 ## Troubleshooting & Fixes
@@ -433,3 +438,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Chat Controller Created (Step 3 of Chat)
 *   [x] Friendship System Implemented (Phase 1 of Social)
 *   [x] Advanced Chat Models & Repos Created (Phase 2 of Social)
+*   [x] Advanced Chat Controller Created (Phase 2 of Social)
