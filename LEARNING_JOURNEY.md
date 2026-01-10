@@ -322,6 +322,27 @@ We are adding a real-time chat feature using WebSockets.
 
 ---
 
+## Step 11: Social Features (Phase 1 - Friendships)
+
+We are building the foundation for a social network.
+
+### 1. The Friendship Model (`Friendship.java`)
+*   **Table:** `friendships`
+*   **Fields:** `requesterId`, `addresseeId`, `status` (PENDING, ACCEPTED, BLOCKED).
+*   **Constraint:** Unique constraint ensures A cannot friend B twice.
+
+### 2. The Repository (`FriendshipRepository.java`)
+*   **`findRelationship`:** Checks if two users are already friends (or pending) regardless of who sent the request.
+*   **`findAllFriends`:** Finds all accepted friendships for a user.
+
+### 3. The Controller (`FriendshipController.java`)
+*   **POST** `/api/friends/request`: Send a friend request.
+*   **POST** `/api/friends/accept/{id}`: Accept a request.
+*   **GET** `/api/friends/{userId}`: List all friends.
+*   **GET** `/api/friends/pending/{userId}`: List incoming requests.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -395,3 +416,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] WebSocket Configured (Step 1 of Chat)
 *   [x] Chat Models Created (Step 2 of Chat)
 *   [x] Chat Controller Created (Step 3 of Chat)
+*   [x] Friendship System Implemented (Phase 1 of Social)
