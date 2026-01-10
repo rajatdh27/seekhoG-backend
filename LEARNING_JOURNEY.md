@@ -343,6 +343,21 @@ We are building the foundation for a social network.
 
 ---
 
+## Step 12: Advanced Chat (Phase 2 - Private Conversations)
+
+We are upgrading the chat system to support private (1-on-1) and group conversations.
+
+### 1. The Models
+*   **`Conversation.java`:** Represents a chat room (DIRECT or GROUP).
+*   **`ConversationParticipant.java`:** Links users to conversations.
+*   **`Message.java`:** Replaces the old `ChatMessage` model. It links to a `conversationId` instead of being global.
+
+### 2. The Repositories
+*   **`ConversationRepository`:** Includes a complex query `findDirectConversation` to check if a 1-on-1 chat already exists between two users.
+*   **`MessageRepository`:** Fetches messages for a specific conversation.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -417,3 +432,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Chat Models Created (Step 2 of Chat)
 *   [x] Chat Controller Created (Step 3 of Chat)
 *   [x] Friendship System Implemented (Phase 1 of Social)
+*   [x] Advanced Chat Models & Repos Created (Phase 2 of Social)
