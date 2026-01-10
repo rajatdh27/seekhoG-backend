@@ -381,6 +381,18 @@ We updated the WebSocket configuration to support private messaging and presence
 
 ---
 
+## Step 14: User Search
+
+We added a way to find users to friend.
+
+### 1. Repository Update (`UserRepository.java`)
+*   Added `findByUsernameContainingIgnoreCase(String query)`: This allows partial matching (e.g., "raj" finds "Rajat").
+
+### 2. Controller (`UserController.java`)
+*   **GET** `/api/users/search?query=...`: Returns a list of matching users.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -458,3 +470,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Advanced Chat Models & Repos Created (Phase 2 of Social)
 *   [x] Advanced Chat Controller Created (Phase 2 of Social)
 *   [x] Real-Time Private Chat & Presence Configured (Phase 3 of Social)
+*   [x] User Search API Implemented
