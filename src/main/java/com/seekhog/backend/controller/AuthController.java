@@ -33,10 +33,16 @@ public class AuthController {
     public User login(@RequestBody User loginRequest) {
         Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
         
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(loginRequest.getPassword())) {
-            return userOpt.get();
+        if (userOpt.isEmpty()) {
+            // Specific error for missing user (due to H2 reset)
+            throw new RuntimeException("User not found. The database might have reset. Please Sign Up again.");
         }
-        throw new RuntimeException("Invalid credentials");
+
+        if (!userOpt.get().getPassword().equals(loginRequest.getPassword())) {
+            throw new RuntimeException("Incorrect password");
+        }
+        
+        return userOpt.get();
     }
 
     // 3. Anonymous Login

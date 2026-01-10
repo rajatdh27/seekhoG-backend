@@ -255,7 +255,7 @@ Think of Docker as a **Shipping Container** for your code.
 ### The Dockerfile Explained
 **File:** `Dockerfile`
 
-We used a **Multi-Stage Build** (a pro technique to keep the file size small).
+We used a **Multi-Stage Build** to keep the final image small.
 
 **Stage 1: The Factory (Build)**
 ```dockerfile
@@ -269,32 +269,13 @@ RUN mvn clean package -DskipTests
 
 **Stage 2: The Delivery Truck (Run)**
 ```dockerfile
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 *   **What it does:** It starts fresh with a tiny, lightweight Java image (no Maven, no source code). It copies *only* the `.jar` file from Stage 1. It tells the server to run that jar on port 8080.
-
-### Why do we do this?
-*   **Size:** The "Factory" image is huge (800MB+). The "Delivery" image is small (<200MB). We only deploy the small one.
-*   **Security:** The final image doesn't contain your source code, only the compiled binary.
-
----
-
-## How to Access the Database (H2 Console)
-
-Since H2 is in-memory, it has a built-in web interface to view your data.
-
-1.  **Open Browser:** Go to `http://localhost:8080/h2-console`
-2.  **Enter Settings:**
-    *   **Driver Class:** `org.h2.Driver`
-    *   **JDBC URL:** `jdbc:h2:mem:seekhogdb`
-    *   **User Name:** `sa`
-    *   **Password:** `password`
-3.  **Connect:** Click the "Connect" button.
-4.  **View Data:** Click on the `USERS` table in the left sidebar and click "Run" to see your registered users.
 
 ---
 
@@ -336,6 +317,16 @@ We encountered some common setup issues. Here is how we fixed them:
     *   Check **Enable annotation processing**.
     *   (Alternatively) Install the Lombok plugin if missing.
 
+### Issue 6: Docker "openjdk:17-jdk-slim not found"
+*   **Problem:** The official OpenJDK Docker image was deprecated/moved.
+*   **Fix:** We switched to `eclipse-temurin:17-jdk-jammy`, which is the modern, stable standard for Java 17 images.
+
+### Issue 7: "Invalid Credentials" on Render (H2 Reset)
+*   **Problem:** H2 is an in-memory database. Every time Render restarts (or sleeps/wakes), the database is wiped clean. Users created yesterday are gone today.
+*   **Fix:**
+    *   **Short Term:** We updated `AuthController` to return a specific error: *"User not found. The database might have reset. Please Sign Up again."*
+    *   **Long Term:** We will eventually switch to PostgreSQL for permanent storage.
+
 ---
 
 ### Current Status
@@ -356,3 +347,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] "My Journey" Feature Implemented (Model, Repo, Controller)
 *   [x] Export Feature Implemented (Excel & PDF with Selection)
 *   [x] Dockerfile Created for Deployment
+*   [x] **Deployed:** Live on Render!
