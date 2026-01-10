@@ -316,6 +316,10 @@ We are adding a real-time chat feature using WebSockets.
 *   **Fields:** `sender`, `content`, `timestamp`.
 *   **Repository:** `ChatMessageRepository` to save messages to the DB.
 
+### 3. Chat Controller (`ChatController.java`)
+*   **Real-time:** `@MessageMapping("/sendMessage")` receives a message, saves it, and `@SendTo("/topic/public")` broadcasts it to everyone.
+*   **History:** `@GetMapping("/api/chat/history")` returns the list of old messages so new users can see what they missed.
+
 ---
 
 ## Troubleshooting & Fixes
@@ -390,3 +394,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Leaderboard Feature Implemented (DTO, Repo Query, Controller)
 *   [x] WebSocket Configured (Step 1 of Chat)
 *   [x] Chat Models Created (Step 2 of Chat)
+*   [x] Chat Controller Created (Step 3 of Chat)
