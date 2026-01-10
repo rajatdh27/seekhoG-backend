@@ -311,6 +311,11 @@ We are adding a real-time chat feature using WebSockets.
 *   **Broker:** `/topic` (This is the channel where messages are broadcasted).
 *   **Prefix:** `/app` (This is where clients send messages to).
 
+### 2. Chat Models (`ChatMessage.java`)
+*   **Table:** `chat_messages`
+*   **Fields:** `sender`, `content`, `timestamp`.
+*   **Repository:** `ChatMessageRepository` to save messages to the DB.
+
 ---
 
 ## Troubleshooting & Fixes
@@ -384,3 +389,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] **Deployed:** Live on Render!
 *   [x] Leaderboard Feature Implemented (DTO, Repo Query, Controller)
 *   [x] WebSocket Configured (Step 1 of Chat)
+*   [x] Chat Models Created (Step 2 of Chat)
