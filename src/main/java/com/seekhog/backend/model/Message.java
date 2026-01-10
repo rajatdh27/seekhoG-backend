@@ -28,10 +28,17 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private MessageType type; // TEXT, IMAGE, CODE
 
+    @Enumerated(EnumType.STRING)
+    private MessageStatus status = MessageStatus.SENT; // Default to SENT
+
     @CreationTimestamp
     private LocalDateTime sentAt;
 
     public enum MessageType {
         TEXT, IMAGE, CODE
+    }
+
+    public enum MessageStatus {
+        SENT, DELIVERED, READ
     }
 }

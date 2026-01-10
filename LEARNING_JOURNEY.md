@@ -423,6 +423,22 @@ We added `totalLogs` to the Friendship Response so you can see how active your f
 
 ---
 
+## Step 17: Read Receipts (Seen Feature)
+
+We added the ability to mark messages as "Read" and notify the sender.
+
+### 1. Model Update (`Message.java`)
+*   Added `MessageStatus status` (SENT, DELIVERED, READ).
+
+### 2. Repository Update (`MessageRepository.java`)
+*   Added `markMessagesAsRead(conversationId, readerId)` query to bulk update unread messages.
+
+### 3. Controller Update (`RealTimeChatController.java`)
+*   **`@MessageMapping("/mark-read")`:** Handles the "I saw this" signal.
+*   **Logic:** Updates DB -> Broadcasts `READ_RECEIPT` event to the conversation topic.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -507,3 +523,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] User Search API Implemented
 *   [x] Friendship DTO & Sent Requests Implemented
 *   [x] Friend Stats (Total Logs) Added
+*   [x] Read Receipts (Seen Feature) Implemented
