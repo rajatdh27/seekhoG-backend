@@ -1,0 +1,23 @@
+package com.seekhog.backend.dto;
+
+import com.seekhog.backend.model.Friendship;
+import lombok.Data;
+
+@Data
+public class FriendshipResponse {
+    private Long id;
+    private String requesterId;
+    private String requesterName;
+    private String addresseeId;
+    private String addresseeName;
+    private String status;
+
+    public FriendshipResponse(Friendship f, String reqName, String addrName) {
+        this.id = f.getId();
+        this.requesterId = f.getRequesterId();
+        this.requesterName = reqName;
+        this.addresseeId = f.getAddresseeId();
+        this.addresseeName = addrName;
+        this.status = f.getStatus().toString();
+    }
+}

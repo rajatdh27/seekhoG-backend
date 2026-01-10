@@ -22,6 +22,9 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
            "(f.requesterId = :userId OR f.addresseeId = :userId) AND f.status = 'ACCEPTED'")
     List<Friendship> findAllFriends(String userId);
 
-    // Find pending requests received by a user
+    // Find pending requests received by a user (Inbox)
     List<Friendship> findByAddresseeIdAndStatus(String addresseeId, Friendship.FriendshipStatus status);
+
+    // Find pending requests sent by a user (Sent Box)
+    List<Friendship> findByRequesterIdAndStatus(String requesterId, Friendship.FriendshipStatus status);
 }

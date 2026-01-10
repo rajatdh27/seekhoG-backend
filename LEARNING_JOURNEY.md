@@ -393,6 +393,21 @@ We added a way to find users to friend.
 
 ---
 
+## Step 15: Friendship Improvements (DTO & Sent Requests)
+
+We fixed the "Unknown User" issue and added the "Sent Requests" tab.
+
+### 1. The DTO (`FriendshipResponse.java`)
+*   Instead of returning raw IDs (`requesterId`), we now return a DTO that includes the **Username** (`requesterName`).
+*   This saves the frontend from having to make extra API calls to look up names.
+
+### 2. Controller Updates (`FriendshipController.java`)
+*   **`sendRequest`:** Now accepts `targetUsername` instead of `addresseeId`. It looks up the ID internally. This is much easier for the frontend.
+*   **`getPendingRequests`:** Now returns `List<FriendshipResponse>` (with names).
+*   **`getSentRequests`:** Added this new endpoint so users can see who they sent requests to.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -441,6 +456,10 @@ We encountered some common setup issues. Here is how we fixed them:
     *   **Short Term:** We updated `AuthController` to return a specific error: *"User not found. The database might have reset. Please Sign Up again."*
     *   **Long Term:** We will eventually switch to PostgreSQL for permanent storage.
 
+### Issue 8: "Unknown User" in Friend Requests
+*   **Problem:** The API was returning raw IDs, so the frontend couldn't display names.
+*   **Fix:** We created `FriendshipResponse` DTO to include usernames in the response.
+
 ---
 
 ### Current Status
@@ -471,3 +490,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Advanced Chat Controller Created (Phase 2 of Social)
 *   [x] Real-Time Private Chat & Presence Configured (Phase 3 of Social)
 *   [x] User Search API Implemented
+*   [x] Friendship DTO & Sent Requests Implemented
