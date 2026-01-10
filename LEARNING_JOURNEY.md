@@ -363,6 +363,24 @@ We are upgrading the chat system to support private (1-on-1) and group conversat
 
 ---
 
+## Step 13: Real-Time Presence & Private Messaging (Phase 3)
+
+We updated the WebSocket configuration to support private messaging and presence detection.
+
+### 1. WebSocket Config Update
+*   Added `/queue` to the broker (for private messages).
+*   Added `/user` destination prefix (for targeting specific users).
+
+### 2. RealTimeChatController
+*   **`@MessageMapping("/private-message")`:** Handles incoming private messages.
+*   **Logic:** Saves the message to the DB and then broadcasts it to the specific conversation topic (`/topic/conversation.{id}`).
+
+### 3. WebSocketEventListener
+*   Listens for `SessionConnectedEvent` and `SessionDisconnectEvent`.
+*   This is where we can add logic to mark users as "Online" or "Offline" in the database.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -439,3 +457,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Friendship System Implemented (Phase 1 of Social)
 *   [x] Advanced Chat Models & Repos Created (Phase 2 of Social)
 *   [x] Advanced Chat Controller Created (Phase 2 of Social)
+*   [x] Real-Time Private Chat & Presence Configured (Phase 3 of Social)
