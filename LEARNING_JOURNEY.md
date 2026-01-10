@@ -301,6 +301,18 @@ We added a leaderboard to show the top 10 users with the most learning logs.
 
 ---
 
+## Step 10: Chat Feature (Real-time)
+
+We are adding a real-time chat feature using WebSockets.
+
+### 1. WebSocket Configuration (`WebSocketConfig.java`)
+*   **Dependency:** `spring-boot-starter-websocket`.
+*   **Endpoint:** `/ws` (This is where the frontend connects).
+*   **Broker:** `/topic` (This is the channel where messages are broadcasted).
+*   **Prefix:** `/app` (This is where clients send messages to).
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -371,3 +383,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Dockerfile Created for Deployment
 *   [x] **Deployed:** Live on Render!
 *   [x] Leaderboard Feature Implemented (DTO, Repo Query, Controller)
+*   [x] WebSocket Configured (Step 1 of Chat)
