@@ -279,6 +279,28 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ---
 
+## Step 9: Leaderboard Feature
+
+We added a leaderboard to show the top 10 users with the most learning logs.
+
+### 1. The DTO (`LeaderboardEntryDTO.java`)
+*   A simple class to hold the result: `username`, `totalLogs`, `lastActive`.
+*   This is needed because the result of our query isn't a "User" or a "Log", it's a mix of both.
+
+### 2. The Repository Query (`LearningEntryRepository.java`)
+*   We wrote a **JPQL (Java Persistence Query Language)** query.
+*   **Logic:**
+    *   `SELECT new ...DTO(...)`: Create a DTO object directly from the query.
+    *   `FROM LearningEntry l, User u`: Join the two tables.
+    *   `WHERE l.userId = u.id`: Match the IDs.
+    *   `GROUP BY u.username`: Group logs by user.
+    *   `ORDER BY COUNT(l) DESC`: Sort by who has the most logs.
+
+### 3. The Controller (`LeaderboardController.java`)
+*   **GET** `/api/leaderboard`: Calls the repository and asks for the top 10 results (`PageRequest.of(0, 10)`).
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -348,3 +370,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Export Feature Implemented (Excel & PDF with Selection)
 *   [x] Dockerfile Created for Deployment
 *   [x] **Deployed:** Live on Render!
+*   [x] Leaderboard Feature Implemented (DTO, Repo Query, Controller)
