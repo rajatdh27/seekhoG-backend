@@ -25,7 +25,7 @@ public class ExportService {
     @Autowired
     private LearningEntryRepository repository;
 
-    public ByteArrayInputStream exportToExcel(String userId, List<Long> logIds) throws IOException {
+    public ByteArrayInputStream exportToExcel(String userId, List<String> logIds) throws IOException { // Changed Long to String
         List<LearningEntry> entries = getValidatedEntries(userId, logIds);
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -55,7 +55,7 @@ public class ExportService {
         }
     }
 
-    public ByteArrayInputStream exportToPdf(String userId, List<Long> logIds) {
+    public ByteArrayInputStream exportToPdf(String userId, List<String> logIds) { // Changed Long to String
         List<LearningEntry> entries = getValidatedEntries(userId, logIds);
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -102,7 +102,7 @@ public class ExportService {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    private List<LearningEntry> getValidatedEntries(String userId, List<Long> logIds) {
+    private List<LearningEntry> getValidatedEntries(String userId, List<String> logIds) { // Changed Long to String
         // 1. Fetch all requested IDs
         List<LearningEntry> entries = repository.findAllById(logIds);
 

@@ -471,6 +471,75 @@ We optimized the Chat List to load instantly without querying the messages table
 
 ---
 
+## Step 21: Optimization - Database Indexing
+
+We added indexes to all critical foreign keys to ensure the app remains fast as data grows.
+
+### 1. Friendship Entity
+*   Added indexes on `requesterId` and `addresseeId`.
+
+### 2. Message Entity
+*   Added indexes on `conversationId` and `senderId`.
+
+### 3. ConversationParticipant Entity
+*   Added indexes on `userId` and `conversationId`.
+
+---
+
+## Step 22: Optimization - UUID Migration
+
+We migrated all database IDs from `Long` (Auto-Increment) to `String` (UUID) for better security and scalability.
+
+### 1. Entity Updates
+*   Changed `@Id Long id` to `@Id String id` in `Friendship`, `Conversation`, `ConversationParticipant`, `Message`, `LearningEntry`.
+*   Added `@PrePersist` method to generate UUIDs automatically if null.
+
+### 2. Repository Updates
+*   Changed `JpaRepository<Entity, Long>` to `JpaRepository<Entity, String>`.
+
+### 3. Controller Updates
+*   Updated all `@PathVariable` and method signatures to accept `String` IDs.
+
+### 4. Frontend Impact
+*   The frontend must now handle IDs as strings (e.g., `"550e8400-e29b..."`) instead of numbers.
+
+---
+
+## Optimization Summary (Before vs. After)
+
+This section explains the impact of the optimizations we implemented in Steps 19-22.
+
+### 1. Display Name
+*   **Before:** Users were identified only by their login email (e.g., `rajatdh27@gmail.com`). This was bad for privacy and looked ugly in the UI.
+*   **After:** Users have a separate `name` field (e.g., "Rajat Thakur").
+*   **Frontend Change Required:**
+    *   **Signup:** Add a "Full Name" input field.
+    *   **Profile/Chat:** Display `user.name` instead of `user.username`.
+
+### 2. Chat List Performance (Last Message Preview)
+*   **Before:** To show the "Inbox" list with the last message (e.g., "Hey, how are you?"), the backend had to query the `messages` table for *every single conversation*.
+    *   *Cost:* If you have 50 chats, that's 51 database queries (N+1 problem).
+*   **After:** The `conversations` table now stores `lastMessageContent` directly.
+    *   *Cost:* Only 1 database query to load the entire inbox.
+*   **Frontend Change Required:**
+    *   The `/api/chat/conversations` endpoint now returns the preview directly. You don't need to fetch history to show the list.
+
+### 3. Database Indexing
+*   **Before:** Searching for "My Friends" required the database to scan the entire `friendships` table (Full Table Scan).
+    *   *Impact:* Slow as the app grows to 10,000+ users.
+*   **After:** We added `@Index` to all foreign keys (`requesterId`, `conversationId`, etc.).
+    *   *Impact:* Searches are instant (O(log n) complexity).
+*   **Frontend Change Required:** None. It just feels faster.
+
+### 4. UUID Migration
+*   **Before:** IDs were predictable numbers (`1`, `2`, `3`).
+    *   *Risk:* Someone could guess `GET /api/chat/history/5` to see someone else's chat.
+*   **After:** IDs are random strings (`a1b2-c3d4...`).
+    *   *Benefit:* Impossible to guess.
+*   **Frontend Change Required:** Treat all IDs as strings.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -616,7 +685,7 @@ Here is the complete schema of what we are storing in the database.
 ### 2. `learning_entries`
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `id` | BIGINT | Primary Key |
+| `id` | VARCHAR (UUID) | Primary Key |
 | `user_id` | VARCHAR | FK to Users |
 | `topic` | VARCHAR | e.g., "Arrays" |
 | `sub_topic` | VARCHAR | e.g., "Two Pointers" |
@@ -629,7 +698,7 @@ Here is the complete schema of what we are storing in the database.
 ### 3. `friendships`
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `id` | BIGINT | Primary Key |
+| `id` | VARCHAR (UUID) | Primary Key |
 | `requester_id` | VARCHAR | Who sent it |
 | `addressee_id` | VARCHAR | Who received it |
 | `status` | VARCHAR | PENDING / ACCEPTED |
@@ -638,7 +707,7 @@ Here is the complete schema of what we are storing in the database.
 ### 4. `conversations`
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `id` | BIGINT | Primary Key |
+| `id` | VARCHAR (UUID) | Primary Key |
 | `type` | VARCHAR | DIRECT / GROUP |
 | `name` | VARCHAR | Group Name (Optional) |
 | `last_message_content` | VARCHAR | Preview of last msg |
@@ -648,16 +717,16 @@ Here is the complete schema of what we are storing in the database.
 ### 5. `conversation_participants`
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `id` | BIGINT | Primary Key |
-| `conversation_id` | BIGINT | FK to Conversations |
+| `id` | VARCHAR (UUID) | Primary Key |
+| `conversation_id` | VARCHAR | FK to Conversations |
 | `user_id` | VARCHAR | FK to Users |
 | `joined_at` | TIMESTAMP | System time |
 
 ### 6. `messages`
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `id` | BIGINT | Primary Key |
-| `conversation_id` | BIGINT | FK to Conversations |
+| `id` | VARCHAR (UUID) | Primary Key |
+| `conversation_id` | VARCHAR | FK to Conversations |
 | `sender_id` | VARCHAR | FK to Users |
 | `content` | TEXT | Message body |
 | `type` | VARCHAR | TEXT / IMAGE |
@@ -710,3 +779,5 @@ Here is the complete schema of what we are storing in the database.
 *   [ ] Video Call (Skipped)
 *   [x] Optimization: Display Name & Indexing Added
 *   [x] Optimization: Last Message Preview Added
+*   [x] Optimization: Database Indexes Added
+*   [x] Optimization: UUID Migration Completed

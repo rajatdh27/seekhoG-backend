@@ -7,29 +7,32 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "messages")
+@Table(name = "messages", indexes = {
+    @Index(name = "idx_msg_convo", columnList = "conversationId"),
+    @Index(name = "idx_msg_sender", columnList = "senderId")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Message {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id; // UUID
 
-    private Long conversationId;
+    private String conversationId; // Changed from Long to String
     private String senderId;
     
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private MessageType type; // TEXT, IMAGE, CODE
+    private MessageType type;
 
     @Enumerated(EnumType.STRING)
-    private MessageStatus status = MessageStatus.SENT; // Default to SENT
+    private MessageStatus status = MessageStatus.SENT;
 
     @CreationTimestamp
     private LocalDateTime sentAt;
@@ -40,5 +43,12 @@ public class Message {
 
     public enum MessageStatus {
         SENT, DELIVERED, READ
+    }
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
     }
 }

@@ -5,14 +5,12 @@ import lombok.Data;
 
 @Data
 public class FriendshipResponse {
-    private Long id;
+    private String id; // Changed Long to String
     private String requesterId;
     private String requesterName;
     private String addresseeId;
     private String addresseeName;
     private String status;
-    
-    // New Field
     private Long totalLogs;
 
     public FriendshipResponse(Friendship f, String reqName, String addrName, Long totalLogs) {

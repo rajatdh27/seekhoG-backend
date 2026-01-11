@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ConversationParticipantRepository extends JpaRepository<ConversationParticipant, Long> {
+public interface ConversationParticipantRepository extends JpaRepository<ConversationParticipant, String> { // Changed Long to String
     List<ConversationParticipant> findByUserId(String userId);
-    List<ConversationParticipant> findByConversationId(Long conversationId);
+    List<ConversationParticipant> findByConversationId(String conversationId); // Changed Long to String
 }

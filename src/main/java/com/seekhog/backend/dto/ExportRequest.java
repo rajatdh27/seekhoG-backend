@@ -6,5 +6,5 @@ import java.util.List;
 @Data
 public class ExportRequest {
     private String userId;
-    private List<Long> logIds;
+    private List<String> logIds; // Changed Long to String
 }

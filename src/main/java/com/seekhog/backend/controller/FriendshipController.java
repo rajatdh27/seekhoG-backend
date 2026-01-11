@@ -26,7 +26,6 @@ public class FriendshipController {
     @Autowired
     private LearningEntryRepository learningRepository;
 
-    // 1. Send Friend Request
     @PostMapping("/request")
     public Friendship sendRequest(@RequestParam String requesterId, @RequestParam String targetUsername) {
         User targetUser = userRepository.findByUsername(targetUsername)
@@ -45,9 +44,8 @@ public class FriendshipController {
         return repository.save(friendship);
     }
 
-    // 2. Accept Request
     @PostMapping("/accept/{id}")
-    public Friendship acceptRequest(@PathVariable Long id) {
+    public Friendship acceptRequest(@PathVariable String id) { // Changed Long to String
         Friendship friendship = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         
@@ -55,43 +53,40 @@ public class FriendshipController {
         return repository.save(friendship);
     }
 
-    // 3. Get My Friends (Accepted)
     @GetMapping("/{userId}")
     public ResponseEntity<List<FriendshipResponse>> getFriends(@PathVariable String userId) {
         List<Friendship> friendships = repository.findAllFriends(userId);
         return ResponseEntity.ok(mapToDTO(friendships, userId));
     }
 
-    // 4. Get Pending Requests (Inbox)
     @GetMapping("/pending/{userId}")
     public ResponseEntity<List<FriendshipResponse>> getPendingRequests(@PathVariable String userId) {
         List<Friendship> requests = repository.findByAddresseeIdAndStatus(userId, Friendship.FriendshipStatus.PENDING);
         return ResponseEntity.ok(mapToDTO(requests, userId));
     }
 
-    // 5. Get Sent Requests (Outbox)
     @GetMapping("/sent/{userId}")
     public ResponseEntity<List<FriendshipResponse>> getSentRequests(@PathVariable String userId) {
         List<Friendship> sent = repository.findByRequesterIdAndStatus(userId, Friendship.FriendshipStatus.PENDING);
         return ResponseEntity.ok(mapToDTO(sent, userId));
     }
 
-    // Helper to convert Entity List -> DTO List
     private List<FriendshipResponse> mapToDTO(List<Friendship> list, String myUserId) {
         return list.stream().map(f -> {
             User requester = userRepository.findById(f.getRequesterId()).orElse(null);
             User addressee = userRepository.findById(f.getAddresseeId()).orElse(null);
             
-            // Determine who the "Friend" is (the other person)
             String friendId = f.getRequesterId().equals(myUserId) ? f.getAddresseeId() : f.getRequesterId();
-            
-            // Fetch stats for the friend
             Long totalLogs = learningRepository.countByUserId(friendId);
+
+            // Use getName() instead of getUsername() for display
+            String reqName = requester != null ? (requester.getName() != null ? requester.getName() : requester.getUsername()) : "Unknown";
+            String addrName = addressee != null ? (addressee.getName() != null ? addressee.getName() : addressee.getUsername()) : "Unknown";
 
             return new FriendshipResponse(
                 f, 
-                requester != null ? requester.getUsername() : "Unknown",
-                addressee != null ? addressee.getUsername() : "Unknown",
+                reqName,
+                addrName,
                 totalLogs
             );
         }).collect(Collectors.toList());

@@ -26,13 +26,11 @@ public class RealTimeChatController {
     @Autowired
     private ConversationRepository conversationRepository;
 
-    // Handle Private Messages
     @MessageMapping("/private-message")
     public void processPrivateMessage(@Payload Message message) {
         message.setStatus(Message.MessageStatus.SENT);
         Message savedMsg = messageRepository.save(message);
         
-        // Optimization: Update Conversation with last message
         Conversation conversation = conversationRepository.findById(message.getConversationId()).orElse(null);
         if (conversation != null) {
             conversation.setLastMessageContent(message.getContent());
@@ -43,7 +41,6 @@ public class RealTimeChatController {
         messagingTemplate.convertAndSend("/topic/conversation." + message.getConversationId(), savedMsg);
     }
 
-    // Handle Read Receipts
     @MessageMapping("/mark-read")
     public void markAsRead(@Payload ReadReceiptRequest request) {
         int count = messageRepository.markMessagesAsRead(request.getConversationId(), request.getReaderId());
@@ -57,7 +54,7 @@ public class RealTimeChatController {
     @Data
     @AllArgsConstructor
     static class ReadReceiptRequest {
-        private Long conversationId;
+        private String conversationId; // Changed Long to String
         private String readerId;
     }
 
@@ -65,7 +62,7 @@ public class RealTimeChatController {
     @AllArgsConstructor
     static class ReadReceiptEvent {
         private String type;
-        private Long conversationId;
+        private String conversationId; // Changed Long to String
         private String readerId;
     }
 }

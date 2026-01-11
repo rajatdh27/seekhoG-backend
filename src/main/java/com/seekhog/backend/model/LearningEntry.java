@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "learning_entries")
@@ -17,25 +18,31 @@ import java.time.LocalDateTime;
 public class LearningEntry {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id; // UUID
 
-    private String userId; // Linking to the User ID (String UUID)
+    private String userId;
 
     private String topic;
     private String subTopic;
 
-    @Column(columnDefinition = "TEXT") // Allows large text content
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    private Integer difficulty; // 1-5 scale?
+    private Integer difficulty;
     
     private String referenceLink;
     private String referenceTitle;
-    private String platform; // e.g., LeetCode, YouTube
+    private String platform;
 
     private LocalDate learningDate;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
+    }
 }

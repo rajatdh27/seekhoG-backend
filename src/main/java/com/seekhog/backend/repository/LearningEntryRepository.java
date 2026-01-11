@@ -10,15 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LearningEntryRepository extends JpaRepository<LearningEntry, Long> {
+public interface LearningEntryRepository extends JpaRepository<LearningEntry, String> { // Changed Long to String
     
-    // Find all entries for a specific user, ordered by date
     List<LearningEntry> findByUserIdOrderByLearningDateDesc(String userId);
 
-    // Count logs for a specific user
     Long countByUserId(String userId);
 
-    // Leaderboard Query
     @Query("SELECT new com.seekhog.backend.dto.LeaderboardEntryDTO(u.username, COUNT(l), MAX(l.learningDate)) " +
            "FROM LearningEntry l, User u " +
            "WHERE l.userId = u.id " +

@@ -11,13 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Repository
-public interface MessageRepository extends JpaRepository<Message, Long> {
+public interface MessageRepository extends JpaRepository<Message, String> { // Changed Long to String
     
-    List<Message> findByConversationIdOrderBySentAtDesc(Long conversationId, Pageable pageable);
+    List<Message> findByConversationIdOrderBySentAtDesc(String conversationId, Pageable pageable); // Changed Long to String
 
-    // Mark messages as READ
     @Modifying
     @Transactional
     @Query("UPDATE Message m SET m.status = 'READ' WHERE m.conversationId = :conversationId AND m.senderId != :readerId AND m.status != 'READ'")
-    int markMessagesAsRead(Long conversationId, String readerId);
+    int markMessagesAsRead(String conversationId, String readerId); // Changed Long to String
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "conversations")
@@ -16,15 +17,13 @@ import java.time.LocalDateTime;
 public class Conversation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id; // UUID
 
     @Enumerated(EnumType.STRING)
-    private ConversationType type; // DIRECT, GROUP
+    private ConversationType type;
 
-    private String name; // Null for DIRECT, required for GROUP
+    private String name;
 
-    // Optimization: Store last message details here to avoid joining 'messages' table for inbox list
     private String lastMessageContent;
     private LocalDateTime lastMessageAt;
 
@@ -33,5 +32,12 @@ public class Conversation {
 
     public enum ConversationType {
         DIRECT, GROUP
+    }
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
     }
 }
