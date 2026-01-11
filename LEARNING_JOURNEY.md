@@ -458,6 +458,19 @@ We improved the database schema for better performance and UX.
 
 ---
 
+## Step 20: Optimization - Last Message Preview
+
+We optimized the Chat List to load instantly without querying the messages table.
+
+### 1. Conversation Entity Update
+*   Added `lastMessageContent` and `lastMessageAt`.
+
+### 2. RealTimeChatController Update
+*   When a message is sent, we now update the `Conversation` entity with the message content and timestamp.
+*   This allows the frontend to show the "Inbox" list with previews instantly.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -628,6 +641,8 @@ Here is the complete schema of what we are storing in the database.
 | `id` | BIGINT | Primary Key |
 | `type` | VARCHAR | DIRECT / GROUP |
 | `name` | VARCHAR | Group Name (Optional) |
+| `last_message_content` | VARCHAR | Preview of last msg |
+| `last_message_at` | TIMESTAMP | Time of last msg |
 | `created_at` | TIMESTAMP | System time |
 
 ### 5. `conversation_participants`
@@ -694,3 +709,4 @@ Here is the complete schema of what we are storing in the database.
 *   [x] Read Receipts (Seen Feature) Implemented
 *   [ ] Video Call (Skipped)
 *   [x] Optimization: Display Name & Indexing Added
+*   [x] Optimization: Last Message Preview Added

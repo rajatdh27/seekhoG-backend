@@ -24,6 +24,10 @@ public class Conversation {
 
     private String name; // Null for DIRECT, required for GROUP
 
+    // Optimization: Store last message details here to avoid joining 'messages' table for inbox list
+    private String lastMessageContent;
+    private LocalDateTime lastMessageAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
