@@ -505,6 +505,23 @@ We migrated all database IDs from `Long` (Auto-Increment) to `String` (UUID) for
 
 ---
 
+## Step 23: Database Migration (H2 to PostgreSQL)
+
+We switched from the in-memory H2 database to a persistent PostgreSQL database for production.
+
+### 1. Dependency Update (`pom.xml`)
+*   Added `org.postgresql:postgresql` driver.
+
+### 2. Configuration Update (`application.properties`)
+*   Updated `spring.datasource.url` to use `${DB_URL}` environment variable.
+*   Updated `spring.jpa.database-platform` to `PostgreSQLDialect`.
+
+### 3. Deployment (Render)
+*   Created a PostgreSQL database on Render.
+*   Added `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` to the Render Environment Variables.
+
+---
+
 ## Optimization Summary (Before vs. After)
 
 This section explains the impact of the optimizations we implemented in Steps 19-22.
@@ -781,3 +798,4 @@ Here is the complete schema of what we are storing in the database.
 *   [x] Optimization: Last Message Preview Added
 *   [x] Optimization: Database Indexes Added
 *   [x] Optimization: UUID Migration Completed
+*   [x] **Database Migration:** Switched to PostgreSQL for Production
