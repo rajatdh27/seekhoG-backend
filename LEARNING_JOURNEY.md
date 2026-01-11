@@ -439,6 +439,12 @@ We added the ability to mark messages as "Read" and notify the sender.
 
 ---
 
+## Step 18: Video Call (Skipped for Now)
+
+We attempted to implement WebRTC signaling but encountered frontend/backend payload mismatches. We decided to skip this feature for now to focus on stability.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -491,6 +497,73 @@ We encountered some common setup issues. Here is how we fixed them:
 *   **Problem:** The API was returning raw IDs, so the frontend couldn't display names.
 *   **Fix:** We created `FriendshipResponse` DTO to include usernames in the response.
 
+### Issue 9: Video Call "User must not be null"
+*   **Problem:** Frontend was sending WebSocket messages without `targetUserId`.
+*   **Resolution:** We decided to skip the Video Call feature for now to focus on core stability.
+
+---
+
+## Final Database Architecture
+
+Here is the complete schema of what we are storing in the database.
+
+### 1. `users` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | VARCHAR (UUID) | Primary Key |
+| `username` | VARCHAR | Login ID / Email |
+| `password` | VARCHAR | Plain text (for now) |
+| `role` | VARCHAR | USER / ANONYMOUS |
+
+### 2. `learning_entries` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | BIGINT | Primary Key |
+| `user_id` | VARCHAR | FK to Users |
+| `topic` | VARCHAR | e.g., "Arrays" |
+| `sub_topic` | VARCHAR | e.g., "Two Pointers" |
+| `content` | TEXT | Large notes |
+| `difficulty` | INT | 1-5 |
+| `platform` | VARCHAR | e.g., "LeetCode" |
+| `learning_date` | DATE | When it happened |
+| `created_at` | TIMESTAMP | System time |
+
+### 3. `friendships` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | BIGINT | Primary Key |
+| `requester_id` | VARCHAR | Who sent it |
+| `addressee_id` | VARCHAR | Who received it |
+| `status` | VARCHAR | PENDING / ACCEPTED |
+| `created_at` | TIMESTAMP | System time |
+
+### 4. `conversations` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | BIGINT | Primary Key |
+| `type` | VARCHAR | DIRECT / GROUP |
+| `name` | VARCHAR | Group Name (Optional) |
+| `created_at` | TIMESTAMP | System time |
+
+### 5. `conversation_participants` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | BIGINT | Primary Key |
+| `conversation_id` | BIGINT | FK to Conversations |
+| `user_id` | VARCHAR | FK to Users |
+| `joined_at` | TIMESTAMP | System time |
+
+### 6. `messages` Table
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | BIGINT | Primary Key |
+| `conversation_id` | BIGINT | FK to Conversations |
+| `sender_id` | VARCHAR | FK to Users |
+| `content` | TEXT | Message body |
+| `type` | VARCHAR | TEXT / IMAGE |
+| `status` | VARCHAR | SENT / READ |
+| `sent_at` | TIMESTAMP | System time |
+
 ---
 
 ### Current Status
@@ -524,3 +597,4 @@ We encountered some common setup issues. Here is how we fixed them:
 *   [x] Friendship DTO & Sent Requests Implemented
 *   [x] Friend Stats (Total Logs) Added
 *   [x] Read Receipts (Seen Feature) Implemented
+*   [ ] Video Call (Skipped)
