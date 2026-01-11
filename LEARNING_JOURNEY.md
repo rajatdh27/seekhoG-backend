@@ -445,6 +445,19 @@ We attempted to implement WebRTC signaling but encountered frontend/backend payl
 
 ---
 
+## Step 19: Optimization - Display Name & Indexing
+
+We improved the database schema for better performance and UX.
+
+### 1. User Entity Update
+*   Added `name` (Display Name) separate from `username` (Login/Email).
+*   Added `@Index` on `username` for faster login/search.
+
+### 2. Auth Controller Update
+*   Signup now accepts `name`. If not provided, it defaults to `username`.
+
+---
+
 ## Troubleshooting & Fixes
 
 We encountered some common setup issues. Here is how we fixed them:
@@ -501,21 +514,93 @@ We encountered some common setup issues. Here is how we fixed them:
 *   **Problem:** Frontend was sending WebSocket messages without `targetUserId`.
 *   **Resolution:** We decided to skip the Video Call feature for now to focus on core stability.
 
+### Issue 10: How to Access the H2 Database
+Since H2 is in-memory, it has a built-in web interface to view your data.
+
+1.  **Open Browser:** Go to `http://localhost:8080/h2-console`
+2.  **Enter Settings:**
+    *   **Driver Class:** `org.h2.Driver`
+    *   **JDBC URL:** `jdbc:h2:mem:seekhogdb`
+    *   **User Name:** `sa`
+    *   **Password:** `password`
+3.  **Connect:** Click the "Connect" button.
+4.  **View Data:** Click on the `USERS` table in the left sidebar and click "Run" to see your registered users.
+
 ---
 
-## Final Database Architecture
+## System Architecture & Data Flow
+
+This section explains how the different parts of the system interact.
+
+### 1. The Request Flow (REST API)
+When a user clicks a button (e.g., "Add Friend"):
+1.  **Frontend (Next.js):** Sends an HTTP POST request to `/api/friends/request`.
+2.  **Controller (Spring Boot):** Receives the request, validates input, and calls the Repository.
+3.  **Repository (JPA):** Translates the Java method call into a SQL query (`INSERT INTO friendships...`).
+4.  **Database (H2):** Executes the SQL and stores the data.
+5.  **Response:** The Controller returns a JSON object to the Frontend.
+
+### 2. The Real-Time Flow (WebSockets)
+When a user sends a chat message:
+1.  **Frontend:** Emits a STOMP message to `/app/private-message`.
+2.  **Controller:** `@MessageMapping` intercepts the message.
+3.  **Database:** The message is saved to the `messages` table via Repository.
+4.  **Broker:** The message is pushed to the specific topic `/topic/conversation.123`.
+5.  **Subscriber:** Any user listening to that topic (the friend) receives the message instantly.
+
+---
+
+## Final Database Architecture & Relationships
 
 Here is the complete schema of what we are storing in the database.
 
 ### 1. `users` Table
+*   **Role:** The center of the universe.
+*   **Relationships:**
+    *   **One-to-Many** with `learning_entries` (A user has many logs).
+    *   **One-to-Many** with `friendships` (A user has many friends).
+    *   **One-to-Many** with `conversation_participants` (A user is in many chats).
+
+### 2. `learning_entries` Table
+*   **Role:** Stores the "Journey" data.
+*   **Join:** `user_id` -> `users.id`.
+*   **Usage:** Used for the "My Journey" page and the "Leaderboard" (by counting entries per user).
+
+### 3. `friendships` Table
+*   **Role:** Connects two users.
+*   **Join:** `requester_id` -> `users.id` AND `addressee_id` -> `users.id`.
+*   **Usage:** Used to show the "Friends List" and allow "Private Chat" creation.
+
+### 4. `conversations` Table
+*   **Role:** Represents a "Room".
+*   **Usage:** It's just a container. It doesn't know *who* is in it directly. It relies on the participants table.
+
+### 5. `conversation_participants` Table
+*   **Role:** The "Bridge" table (Many-to-Many).
+*   **Join:** `conversation_id` -> `conversations.id` AND `user_id` -> `users.id`.
+*   **Usage:**
+    *   To find "My Chats": `SELECT * FROM participants WHERE user_id = ME`.
+    *   To find "Direct Chat with Bob": Find a conversation where BOTH Me and Bob are participants.
+
+### 6. `messages` Table
+*   **Role:** The actual content.
+*   **Join:** `conversation_id` -> `conversations.id` AND `sender_id` -> `users.id`.
+*   **Usage:** Fetched when you open a chat window.
+
+---
+
+## Detailed Schema Reference
+
+### 1. `users`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | VARCHAR (UUID) | Primary Key |
 | `username` | VARCHAR | Login ID / Email |
+| `name` | VARCHAR | Display Name |
 | `password` | VARCHAR | Plain text (for now) |
 | `role` | VARCHAR | USER / ANONYMOUS |
 
-### 2. `learning_entries` Table
+### 2. `learning_entries`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | BIGINT | Primary Key |
@@ -528,7 +613,7 @@ Here is the complete schema of what we are storing in the database.
 | `learning_date` | DATE | When it happened |
 | `created_at` | TIMESTAMP | System time |
 
-### 3. `friendships` Table
+### 3. `friendships`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | BIGINT | Primary Key |
@@ -537,7 +622,7 @@ Here is the complete schema of what we are storing in the database.
 | `status` | VARCHAR | PENDING / ACCEPTED |
 | `created_at` | TIMESTAMP | System time |
 
-### 4. `conversations` Table
+### 4. `conversations`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | BIGINT | Primary Key |
@@ -545,7 +630,7 @@ Here is the complete schema of what we are storing in the database.
 | `name` | VARCHAR | Group Name (Optional) |
 | `created_at` | TIMESTAMP | System time |
 
-### 5. `conversation_participants` Table
+### 5. `conversation_participants`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | BIGINT | Primary Key |
@@ -553,7 +638,7 @@ Here is the complete schema of what we are storing in the database.
 | `user_id` | VARCHAR | FK to Users |
 | `joined_at` | TIMESTAMP | System time |
 
-### 6. `messages` Table
+### 6. `messages`
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `id` | BIGINT | Primary Key |
@@ -563,6 +648,16 @@ Here is the complete schema of what we are storing in the database.
 | `type` | VARCHAR | TEXT / IMAGE |
 | `status` | VARCHAR | SENT / READ |
 | `sent_at` | TIMESTAMP | System time |
+
+---
+
+### Example Scenario: "Rajat chats with Rahul"
+
+1.  **Friendship:** Rajat (`requester_id`) sends request to Rahul (`addressee_id`). Status becomes `ACCEPTED`.
+2.  **Start Chat:** Frontend calls API. Backend checks `conversation_participants`. If no common room exists, it creates a new `conversation` (ID 101) and adds both as `participants`.
+3.  **Send Message:** Rajat sends "Hello". Backend saves to `messages` with `conversation_id = 101` and `sender_id = Rajat`.
+4.  **Real-Time:** Backend pushes message to `/topic/conversation.101`. Rahul (who is subscribed) sees it instantly.
+5.  **Read Receipt:** Rahul opens chat. Backend updates `messages` status to `READ` where `conversation_id = 101` and `sender_id != Rahul`.
 
 ---
 
@@ -598,3 +693,4 @@ Here is the complete schema of what we are storing in the database.
 *   [x] Friend Stats (Total Logs) Added
 *   [x] Read Receipts (Seen Feature) Implemented
 *   [ ] Video Call (Skipped)
+*   [x] Optimization: Display Name & Indexing Added

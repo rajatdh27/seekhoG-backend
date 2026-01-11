@@ -12,20 +12,25 @@ import java.util.UUID;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired // Inject the repository (Dependency Injection)
+    @Autowired
     private UserRepository userRepository;
 
     // 1. Sign Up
     @PostMapping("/signup")
     public User signup(@RequestBody User user) {
-        // Check if user already exists in DB
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("User already exists");
         }
         
         user.setId(UUID.randomUUID().toString());
         user.setRole("USER");
-        return userRepository.save(user); // Save to H2 Database
+        
+        // If name is not provided, default to username
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getUsername());
+        }
+        
+        return userRepository.save(user);
     }
 
     // 2. Login
@@ -34,7 +39,6 @@ public class AuthController {
         Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
         
         if (userOpt.isEmpty()) {
-            // Specific error for missing user (due to H2 reset)
             throw new RuntimeException("User not found. The database might have reset. Please Sign Up again.");
         }
 
@@ -51,9 +55,8 @@ public class AuthController {
         User anonUser = new User();
         anonUser.setId(UUID.randomUUID().toString());
         anonUser.setUsername("Guest_" + anonUser.getId().substring(0, 5));
+        anonUser.setName("Guest User");
         anonUser.setRole("ANONYMOUS");
-        // We usually DON'T save anonymous users to DB to save space, 
-        // but we return them so the frontend has a session.
         return anonUser;
     }
 }
