@@ -3,6 +3,8 @@ package com.seekhog.backend.controller;
 import com.seekhog.backend.model.User;
 import com.seekhog.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -17,9 +19,9 @@ public class AuthController {
 
     // 1. Sign Up
     @PostMapping("/signup")
-    public User signup(@RequestBody User user) {
+    public ResponseEntity<?> signup(@RequestBody User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
         }
         
         user.setId(UUID.randomUUID().toString());
@@ -30,33 +32,37 @@ public class AuthController {
             user.setName(user.getUsername());
         }
         
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(savedUser);
     }
 
     // 2. Login
     @PostMapping("/login")
-    public User login(@RequestBody User loginRequest) {
+    public ResponseEntity<?> login(@RequestBody User loginRequest) {
         Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
         
         if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found. The database might have reset. Please Sign Up again.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found. Please Sign Up first.");
         }
 
-        if (!userOpt.get().getPassword().equals(loginRequest.getPassword())) {
-            throw new RuntimeException("Incorrect password");
+        User user = userOpt.get();
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Incorrect password");
         }
         
-        return userOpt.get();
+        return ResponseEntity.ok(user);
     }
 
     // 3. Anonymous Login
     @PostMapping("/anonymous")
-    public User anonymousLogin() {
+    public ResponseEntity<User> anonymousLogin() {
         User anonUser = new User();
         anonUser.setId(UUID.randomUUID().toString());
         anonUser.setUsername("Guest_" + anonUser.getId().substring(0, 5));
         anonUser.setName("Guest User");
         anonUser.setRole("ANONYMOUS");
-        return anonUser;
+        return ResponseEntity.ok(anonUser);
     }
 }
